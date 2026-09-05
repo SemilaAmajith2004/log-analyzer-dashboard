@@ -85,23 +85,6 @@
             color: var(--accent-cyan);
             border-radius: 8px;
         }
-
-        .table-dark-custom {
-            color: var(--text-color);
-            background: transparent;
-        }
-
-        .table-dark-custom th {
-            border-color: var(--border-color);
-            color: #94a3b8;
-            font-weight: 600;
-            text-transform: uppercase;
-            font-size: 0.85rem;
-        }
-
-        .table-dark-custom td {
-            border-color: var(--border-color);
-        }
     </style>
 </head>
 <body class="pb-5">
@@ -147,22 +130,21 @@
             </div>
         </div>
 
-        <!-- Charts Section -->
-        <div class="row mt-4" id="chartsSection" style="display: none;">
-            <!-- Status Code Distribution -->
-            <div class="col-md-6 mb-4">
-                <div class="custom-card p-4 h-100">
+        <!-- Charts Section (CSS Grid) -->
+        <div id="chartsSection" style="display: none;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;" class="mt-4">
+                <!-- Status Code Distribution (Left) -->
+                <div class="custom-card p-4">
                     <h6 class="text-muted mb-3"><i class="fa-solid fa-chart-pie me-2 text-info"></i>HTTP Status Code Distribution</h6>
-                    <div style="max-height: 300px; position: relative;">
+                    <div style="height: 280px; position: relative;">
                         <canvas id="statusChart"></canvas>
                     </div>
                 </div>
-            </div>
-            <!-- Top IPs Chart -->
-            <div class="col-md-6 mb-4">
-                <div class="custom-card p-4 h-100">
+
+                <!-- Top IPs Chart (Right) -->
+                <div class="custom-card p-4">
                     <h6 class="text-muted mb-3"><i class="fa-solid fa-chart-simple me-2 text-info"></i>Top Requesting IP Addresses</h6>
-                    <div style="max-height: 300px; position: relative;">
+                    <div style="height: 280px; position: relative;">
                         <canvas id="ipChart"></canvas>
                     </div>
                 </div>
@@ -195,9 +177,9 @@
 
             try {
                 const response = await fetch('http://127.0.0.1:8000/api/analyze', {
-    method: 'POST',
-    body: formData
-});
+                    method: 'POST',
+                    body: formData
+                });
 
                 if (!response.ok) {
                     throw new Error('Failed to analyze log file.');
@@ -234,7 +216,7 @@
                     </div>`;
             }
 
-            // Render Status Chart
+            // Render Status Chart (Left)
             const statusCtx = document.getElementById('statusChart').getContext('2d');
             if (statusChartInstance) statusChartInstance.destroy();
             
@@ -251,12 +233,15 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: { labels: { color: '#e2e8f0' } }
+                        legend: { 
+                            position: 'top',
+                            labels: { color: '#e2e8f0', boxWidth: 12, padding: 10 } 
+                        }
                     }
                 }
             });
 
-            // Render Top IPs Chart
+            // Render Top IPs Chart (Right)
             const ipCtx = document.getElementById('ipChart').getContext('2d');
             if (ipChartInstance) ipChartInstance.destroy();
 
@@ -275,7 +260,7 @@
                     maintainAspectRatio: false,
                     scales: {
                         x: { ticks: { color: '#e2e8f0' }, grid: { color: 'rgba(255,255,255,0.05)' } },
-                        y: { ticks: { color: '#e2e8f0' }, grid: { color: 'rgba(255,255,255,0.05)' } }
+                        y: { ticks: { color: '#e2e8f0', precision: 0 }, grid: { color: 'rgba(255,255,255,0.05)' } }
                     },
                     plugins: {
                         legend: { labels: { color: '#e2e8f0' } }
