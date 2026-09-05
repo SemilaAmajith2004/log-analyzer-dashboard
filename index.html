@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cybersecurity Log Analyzer Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { background-color: #0f172a; color: #f8fafc; }
+        .card { background-color: #1e293b; border: 1px solid #334155; color: #fff; }
+        .alert-custom { background-color: #451a03; border-color: #78350f; color: #fde68a; }
+    </style>
+</head>
+<body class="p-4">
+
+<div class="container">
+    <h2 class="mb-4 text-center text-info">Cybersecurity Log & Traffic Analyzer</h2>
+    
+    <div class="card p-4 mb-4">
+        <div class="row g-3 align-items-center">
+            <div class="col-auto">
+                <label for="logFile" class="col-form-label">Upload Server Log File (.log):</label>
+            </div>
+            <div class="col-auto">
+                <input type="file" id="logFile" class="form-control" accept=".log,.txt">
+            </div>
+            <div class="col-auto">
+                <button onclick="uploadAndAnalyze()" class="btn btn-primary">Analyze Log</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="alertSection" class="d-none">
+        <div class="alert alert-custom d-flex align-items-center" role="alert">
+            <span class="fs-4 me-2">⚠️</span>
+            <div>
+                <strong>Security Alert: Potential Brute Force Attack Detected!</strong>
+                <div id="alertDetails"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card p-3 text-center">
+                <h5>Total Requests</h5>
+                <h2 id="totalRequests" class="text-success">0</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card p-3">
+                <h5 class="text-center">HTTP Status Code Breakdown</h5>
+                <canvas id="statusChart"></canvas>
+            </div>
+        </div>
+        <div class="col-md-6 mb-4">
+            <div class="card p-3">
+                <h5 class="text-center">Top 5 Visiting IP Addresses</h5>
+                <canvas id="ipChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let statusChartInstance = null;
+    let ipChartInstance = null;
+
+    async function uploadAndAnalyze() {
+        const fileInput = document.getElementById('logFile');
+        if (!fileInput.files[0]) {
+            alert('කරුණාකර Log file එකක් Select කරන්න!');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('file', fileInput.files[0]);
+
+        try {
+            const response = await fetch('http://127.0.0.1:8000/api/analyze', {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (data.error) {
+                alert(data.error);
+                return;
+            }
+
+            // Update Total Requests
+            document.getElementById('totalRequests').innerText = data.total_requests;
+
+            // Security Alerts Update
+            const bruteForceIPs = data.security_alerts.potential_brute_force_ips;
+            const alertSection = document.getElementById('alertSection');
+            const alertDetails = document.getElementById('alertDetails');
+
+            if (Object.keys(bruteForceIPs).length > 0) {
+                alertSection.classList.remove('d-none');
+                let detailsText = '';
+                for (const [ip, count] of Object.entries(bruteForceIPs)) {
+                    detailsText += `IP: <code>${ip}</code> - Failed Login Attempts: <strong>${count}</strong><br>`;
+                }
+                alertDetails.innerHTML = detailsText;
+            } else {
+                alertSection.classList.add('d-none');
+            }
+
+            // Render Status Chart
+            renderStatusChart(data.status_codes);
+            // Render Top IPs Chart
+            renderIPChart(data.top_ips);
+
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Backend API එක සමඟ සම්බන්ධ වීමට නොහැකි විය!');
+        }
+    }
+
+    function renderStatusChart(statusCodes) {
+        const ctx = document.getElementById('statusChart').getContext('2d');
+        if (statusChartInstance) statusChartInstance.destroy();
+
+        statusChartInstance = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: Object.keys(statusCodes).map(code => 'Status ' + code),
+                datasets: [{
+                    data: Object.values(statusCodes),
+                    backgroundColor: ['#22c55e', '#ef4444', '#f59e0b', '#3b82f6']
+                }]
+            }
+        });
+    }
+
+    function renderIPChart(topIPs) {
+        const ctx = document.getElementById('ipChart').getContext('2d');
+        if (ipChartInstance) ipChartInstance.destroy();
+
+        ipChartInstance = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: Object.keys(topIPs),
+                datasets: [{
+                    label: 'Request Count',
+                    data: Object.values(topIPs),
+                    backgroundColor: '#3b82f6'
+                }]
+            },
+            options: {
+                scales: { y: { beginAtZero: true } }
+            }
+        });
+    }
+</script>
+</body>
+</html>
