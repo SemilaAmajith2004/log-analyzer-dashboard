@@ -13,23 +13,32 @@ A lightweight, real-time web-based log analysis dashboard designed to parse web 
 
 ---
 
-## System Architecture & Flowchart
+## System Architecture & Workflow Diagrams
 
-### 1. High-Level Data Flow
+### 1. High-Level System Architecture (Sequence Diagram)
 
-```mermaid
-sequenceDiagram
-    autonumber
-    actor User as User / Administrator
-    participant Frontend as Web Dashboard (HTML/JS)
-    participant FastAPI as FastAPI Backend
-    participant Parser as Parsing & Analysis Engine
+![Sequence Diagram](sequence_diagram.png)
 
-    User->>Frontend: Select & Upload 'sample_access.log'
-    Frontend->>FastAPI: POST /api/analyze (Multipart File)
-    FastAPI->>Parser: Read & Parse Log Lines via Regex
-    Parser->>Parser: Calculate Top IPs & Status Codes
-    Parser->>Parser: Detect Brute Force Patterns (401 >= 3)
-    Parser-->>FastAPI: Return Aggregated JSON Data
-    FastAPI-->>Frontend: HTTP 200 OK (JSON Response)
-    Frontend->>User: Render Visual Charts & Security Alerts
+### 2. Backend Logic Execution Flowchart
+
+![Execution Flowchart](flowchart.png)
+
+---
+
+## Tech Stack
+
+* **Backend:** Python 3.x, FastAPI, Uvicorn, Pandas, Regex
+* **Frontend:** HTML5, CSS3, JavaScript (Fetch API), Bootstrap 5, Chart.js
+* **Version Control & Development:** Git, GitHub, VS Code
+
+---
+
+## Getting Started Locally
+
+### 1. Prerequisites
+Ensure Python 3.8+ is installed on your local environment.
+
+### 2. Clone the Repository
+```bash
+git clone [https://github.com/SemilaAmajith2004/log-analyzer-dashboard.git](https://github.com/SemilaAmajith2004/log-analyzer-dashboard.git)
+cd log-analyzer-dashboard
