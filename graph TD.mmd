@@ -1,0 +1,35 @@
+graph TD
+    A[FastAPI application] --> B{Incoming request}
+    
+    B -- GET / --> C[Return API running message]
+    B -- POST /api/analyze --> D[Receive uploaded log file]
+    
+    D --> E[Read and decode UTF-8 contents]
+    E --> F[Split log text into lines]
+    
+    F --> G{More lines to process}
+    G -- Yes --> H[Match line against log regex]
+    
+    H -- No match --> G
+    H -- Match found --> I[Extract fields and append parsed log]
+    I --> G
+    
+    G -- No --> J{Any parsed logs}
+    J -- No --> K[Return invalid format error]
+    
+    J -- Yes --> L[Create Pandas DataFrame]
+    
+    L --> M[Filter status code 401]
+    L --> N[Calculate top five IP addresses]
+    L --> O[Count HTTP status codes]
+    
+    M --> P[Count unauthorized requests by IP]
+    P --> Q{Requests from IP are at least 3}
+    
+    Q -- Yes --> R[Create brute force alerts]
+    Q -- No --> S[No brute force alert for IP]
+    
+    R --> T[Return analysis results]
+    S --> T
+    N --> T
+    O --> T
