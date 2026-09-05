@@ -17,11 +17,11 @@ A lightweight, real-time web-based log analysis dashboard designed to parse web 
 
 ### 1. High-Level System Architecture (Sequence Diagram)
 
-![Sequence Diagram](sequence_diagram.png)
+Sequence.png
 
 ### 2. Backend Logic Execution Flowchart
 
-![Execution Flowchart](flowchart.png)
+api_log_analysis.png
 
 ---
 
